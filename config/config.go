@@ -1,9 +1,7 @@
 package config
 
 import (
-	"log"
 	"os"
-
 )
 
 type BotConfig struct {
