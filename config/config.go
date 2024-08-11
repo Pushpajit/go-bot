@@ -1,7 +1,10 @@
 package config
 
 import (
+	"log"
 	"os"
+
+	"github.com/joho/godotenv"
 )
 
 type BotConfig struct {
@@ -15,9 +18,9 @@ var (
 
 func ReadConfig() error {
 	// load .env file
-	// if err := godotenv.Load(); err != nil {
-	// 	log.Fatalf("❌ ENV load failed: %v", err.Error())
-	// }
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("❌ ENV load failed: %v", err.Error())
+	}
 
 	// set the Auth variable
 	Auth = &BotConfig{

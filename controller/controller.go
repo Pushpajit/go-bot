@@ -3,11 +3,16 @@ package controller
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/Pushpajit/go-bot/controller/embed"
+	scrapping "github.com/Pushpajit/go-bot/utils/Scrapping"
+	"github.com/Pushpajit/go-bot/utils/tmdb/helper"
+	"github.com/Pushpajit/go-bot/utils/tmdb/models"
 	"github.com/bwmarrin/discordgo"
 )
 
@@ -110,6 +115,11 @@ func getHelp(s *discordgo.Session, m *discordgo.MessageCreate) {
 				Inline: false,
 			},
 			{
+				Name:   "!image <any-type-image> <count (integer)> <orientation (default landscape)>",
+				Value:  "It will download quality images of the number of count you've given. Also you can specify the orientation 'landscape' or 'portrait'",
+				Inline: false,
+			},
+			{
 				Name:   "!help ",
 				Value:  "Show all the available bot commands. 🆘",
 				Inline: false,
@@ -132,6 +142,107 @@ func getHelp(s *discordgo.Session, m *discordgo.MessageCreate) {
 		deletemsg = append(deletemsg, msgID.ID)
 	} else {
 		mtx.Unlock()
+	}
+}
+
+// get movies
+func GetMovies(s *discordgo.Session, m *discordgo.MessageCreate, msg []string, mode int) {
+	var response models.Response
+
+	switch mode {
+	case 1:
+		fmt.Println("Getting GetPlayingMovie()")
+		if len(msg) == 2 {
+			response = helper.GetPlayingMovie(msg[1])
+		} else {
+			response = helper.GetPlayingMovie("")
+		}
+
+	case 2:
+		fmt.Println("Getting GetPopularMovies()")
+		if len(msg) == 2 {
+			response = helper.GetPopularMovies(msg[1])
+		} else {
+			response = helper.GetPopularMovies("")
+		}
+
+	case 3:
+		fmt.Println("Getting GetSearchMovie()")
+		response = helper.GetSearchMovie(msg[1])
+
+	case 4:
+		fmt.Println("Getting GetSimilarMovie()")
+		num, _ := strconv.Atoi(strings.Trim(msg[1], " "))
+		response = helper.GetSimilarMovie(num)
+
+	case 5:
+		fmt.Println("Getting GetSuggestedMovie()")
+		num, _ := strconv.Atoi(strings.Trim(msg[1], " "))
+		response = helper.GetSuggestedMovie(num)
+
+	case 6:
+		fmt.Println("Getting GetUpcomingMovie()")
+		if len(msg) == 2 {
+			response = helper.GetUpcomingMovie(msg[1])
+		} else {
+			response = helper.GetUpcomingMovie("")
+		}
+	case 7:
+		fmt.Println("Getting GetDiscoverMovie()")
+		response = helper.GetDiscoverMovie(msg[1:])
+	}
+
+	result := response.Results
+	// Shuffle shuffles a slice in place.
+	func(slice []models.Movie) {
+		rand.Seed(time.Now().UnixNano()) // Seed the random number generator
+		rand.Shuffle(len(slice), func(i, j int) {
+			slice[i], slice[j] = slice[j], slice[i]
+		})
+	}(result)
+
+	// Send the custom created embed
+	for ind, item := range result {
+		if ind < 5 {
+			_, err := s.ChannelMessageSendEmbed(m.ChannelID, embed.CreateMovieEmbed(item))
+			if err != nil {
+				panic(err.Error())
+			}
+		}
+	}
+}
+
+// download images and send them to the server
+func sendImage(s *discordgo.Session, m *discordgo.MessageCreate, msg []string) {
+	if len(msg) < 3 {
+		s.ChannelMessageSend(m.ChannelID, "syntax: !image <type of img> <count>")
+		return
+	}
+	n, _ := strconv.Atoi(msg[2])
+	urls := scrapping.GetImage(msg)
+
+	// Shuffle the slice
+	func(slice []scrapping.Image) {
+		rand.Seed(time.Now().UnixNano())
+		rand.Shuffle(len(slice), func(i, j int) {
+			slice[i], slice[j] = slice[j], slice[i]
+		})
+	}(urls)
+
+	s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("✨ Generating Image Related To '%v'", msg[1]))
+	for index, url := range urls {
+		if index < n {
+			// Create Embed
+			embed := &discordgo.MessageEmbed{
+				Image: &discordgo.MessageEmbedImage{
+					URL: url.URL,
+				},
+			}
+
+			// Send Embed
+			s.ChannelMessageSendEmbed(m.ChannelID, embed)
+
+		}
 	}
 }
 
@@ -163,5 +274,32 @@ func Handler(s *discordgo.Session, m *discordgo.MessageCreate) {
 
 	case "!help":
 		getHelp(s, m) // show bot commands
+
+	case "!image":
+		sendImage(s, m, msg) // for download and send the image
+
+	case "!movie-current":
+		GetMovies(s, m, msg, 1)
+
+	case "!movie-popular":
+		GetMovies(s, m, msg, 2)
+
+	case "!movie-search":
+		GetMovies(s, m, msg, 3)
+
+	case "!movie-similar":
+		GetMovies(s, m, msg, 4)
+
+	case "!movie-suggest":
+		GetMovies(s, m, msg, 5)
+
+	case "!movie-upcoming":
+		GetMovies(s, m, msg, 6)
+
+	case "!movie-discover":
+		GetMovies(s, m, msg, 7)
+
+	default:
+		getHelp(s, m)
 	}
 }
