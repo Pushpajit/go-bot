@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/Pushpajit/go-bot/controller/embed"
-	scrapping "github.com/Pushpajit/go-bot/utils/Scrapping"
+	"github.com/Pushpajit/go-bot/utils/scrapping"
 	"github.com/Pushpajit/go-bot/utils/tmdb/helper"
 	"github.com/Pushpajit/go-bot/utils/tmdb/models"
 	"github.com/bwmarrin/discordgo"
@@ -99,38 +99,7 @@ func ghostMode(s *discordgo.Session, m *discordgo.MessageCreate, msg []string) {
 
 // helper function-01
 func getHelp(s *discordgo.Session, m *discordgo.MessageCreate) {
-	embed := &discordgo.MessageEmbed{
-		Title:       "Bot Commands!",
-		Description: "Here are the available commands:",
-		Color:       0x6AD7E4,
-		Fields: []*discordgo.MessageEmbedField{
-			{
-				Name:   "!hi or !hello",
-				Value:  "Replies with a greeting message. ✨🎉🎊",
-				Inline: false,
-			},
-			{
-				Name:   "!ghost <seconds>",
-				Value:  "Enables ghost mode 👻 for the specified duration in seconds. Messages sent during this time will be deleted automatically after the time expires.",
-				Inline: false,
-			},
-			{
-				Name:   "!image <any-type-image> <count (integer)> <orientation (default landscape)>",
-				Value:  "It will download quality images of the number of count you've given. Also you can specify the orientation 'landscape' or 'portrait'",
-				Inline: false,
-			},
-			{
-				Name:   "!help ",
-				Value:  "Show all the available bot commands. 🆘",
-				Inline: false,
-			},
-		},
-		Footer: &discordgo.MessageEmbedFooter{
-			Text: "Working on more commands 🎮, please stay tuned! 🎆🎇",
-		},
-	}
-
-	msgID, err := s.ChannelMessageSendEmbed(m.ChannelID, embed)
+	msgID, err := s.ChannelMessageSendEmbed(m.ChannelID, embed.GetHelpEmbed())
 	if err != nil {
 		log.Panic(err.Error())
 	}
