@@ -173,9 +173,17 @@ func GetMovies(s *discordgo.Session, m *discordgo.MessageCreate, msg []string, m
 	// Send the custom created embed
 	for ind, item := range result {
 		if ind < 5 {
-			_, err := s.ChannelMessageSendEmbed(m.ChannelID, embed.CreateMovieEmbed(item))
+			msgID, err := s.ChannelMessageSendEmbed(m.ChannelID, embed.CreateMovieEmbed(item))
 			if err != nil {
 				panic(err.Error())
+			}
+			// start appending the messegeID if isRecording is true
+			mtx.Lock()
+			if isRecording {
+				mtx.Unlock()
+				deletemsg = append(deletemsg, msgID.ID)
+			} else {
+				mtx.Unlock()
 			}
 		}
 	}
@@ -198,7 +206,16 @@ func sendImage(s *discordgo.Session, m *discordgo.MessageCreate, msg []string) {
 		})
 	}(urls)
 
-	s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("✨ Generating Image Related To '%v'", msg[1]))
+	msgID, _ := s.ChannelMessageSend(m.ChannelID, fmt.Sprintf("✨ Generating Image Related To '%v'", msg[1]))
+	// start appending the messegeID if isRecording is true
+	mtx.Lock()
+	if isRecording {
+		mtx.Unlock()
+		deletemsg = append(deletemsg, msgID.ID)
+	} else {
+		mtx.Unlock()
+	}
+
 	for index, url := range urls {
 		if index < n {
 			// Create Embed
@@ -209,7 +226,15 @@ func sendImage(s *discordgo.Session, m *discordgo.MessageCreate, msg []string) {
 			}
 
 			// Send Embed
-			s.ChannelMessageSendEmbed(m.ChannelID, embed)
+			msgID, _ := s.ChannelMessageSendEmbed(m.ChannelID, embed)
+			// start appending the messegeID if isRecording is true
+			mtx.Lock()
+			if isRecording {
+				mtx.Unlock()
+				deletemsg = append(deletemsg, msgID.ID)
+			} else {
+				mtx.Unlock()
+			}
 
 		}
 	}
