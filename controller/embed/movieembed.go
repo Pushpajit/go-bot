@@ -52,14 +52,14 @@ func CreateMovieEmbed(movie models.Movie) *discordgo.MessageEmbed {
 				Inline: false,
 			},
 			{
-				Name:   "🔗 More Info",
-				Value:  fmt.Sprintf("[TMDb Link](https://www.themoviedb.org/movie/%d)", movie.Id),
-				Inline: false,
-			},
-			{
 				Name:   "🎥 Watch Trailer",
 				Value:  fmt.Sprintf("[YouTube Link](%v)", youtubeURL),
-				Inline: false,
+				Inline: true,
+			},
+			{
+				Name:   "🔗 More Info",
+				Value:  fmt.Sprintf("[TMDb Link](https://www.themoviedb.org/movie/%d)", movie.Id),
+				Inline: true,
 			},
 		},
 		Image: &discordgo.MessageEmbedImage{
