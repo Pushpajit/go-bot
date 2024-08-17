@@ -117,6 +117,7 @@ func getHelp(s *discordgo.Session, m *discordgo.MessageCreate) {
 // get movies
 func GetMovies(s *discordgo.Session, m *discordgo.MessageCreate, msg []string, mode int) {
 	var response models.Response
+	shuffled := false
 
 	switch mode {
 	case 1:
@@ -126,6 +127,7 @@ func GetMovies(s *discordgo.Session, m *discordgo.MessageCreate, msg []string, m
 		} else {
 			response = helper.GetPlayingMovie("")
 		}
+		shuffled = true
 
 	case 2:
 		fmt.Println("Getting GetPopularMovies()")
@@ -134,6 +136,7 @@ func GetMovies(s *discordgo.Session, m *discordgo.MessageCreate, msg []string, m
 		} else {
 			response = helper.GetPopularMovies("")
 		}
+		shuffled = true
 
 	case 3:
 		fmt.Println("Getting GetSearchMovie()")
@@ -143,11 +146,13 @@ func GetMovies(s *discordgo.Session, m *discordgo.MessageCreate, msg []string, m
 		fmt.Println("Getting GetSimilarMovie()")
 		num, _ := strconv.Atoi(strings.Trim(msg[1], " "))
 		response = helper.GetSimilarMovie(num)
+		// shuffled = true
 
 	case 5:
 		fmt.Println("Getting GetSuggestedMovie()")
 		num, _ := strconv.Atoi(strings.Trim(msg[1], " "))
 		response = helper.GetSuggestedMovie(num)
+		shuffled = true
 
 	case 6:
 		fmt.Println("Getting GetUpcomingMovie()")
@@ -156,19 +161,24 @@ func GetMovies(s *discordgo.Session, m *discordgo.MessageCreate, msg []string, m
 		} else {
 			response = helper.GetUpcomingMovie("")
 		}
+		shuffled = true
+
 	case 7:
 		fmt.Println("Getting GetDiscoverMovie()")
 		response = helper.GetDiscoverMovie(msg[1:])
 	}
 
 	result := response.Results
+
 	// Shuffle shuffles a slice in place.
-	func(slice []models.Movie) {
-		rand.Seed(time.Now().UnixNano()) // Seed the random number generator
-		rand.Shuffle(len(slice), func(i, j int) {
-			slice[i], slice[j] = slice[j], slice[i]
-		})
-	}(result)
+	if shuffled {
+		func(slice []models.Movie) {
+			rand.Seed(time.Now().UnixNano()) // Seed the random number generator
+			rand.Shuffle(len(slice), func(i, j int) {
+				slice[i], slice[j] = slice[j], slice[i]
+			})
+		}(result)
+	}
 
 	// Send the custom created embed
 	var msgIDS []string
