@@ -56,10 +56,10 @@ func CreateMovieEmbed(movie models.Movie) *discordgo.MessageEmbed {
 			},
 		},
 		Image: &discordgo.MessageEmbedImage{
-			URL: baseImageURL + movie.Backdrop,
+			URL: getyoutubeURL(movie.Id),
 		},
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
-			URL: getyoutubeURL(movie.Id),
+			URL: baseImageURL + movie.Poster,
 		},
 		Footer: &discordgo.MessageEmbedFooter{
 			Text:    "Powered by Golang 🔵",
