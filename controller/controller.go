@@ -81,9 +81,14 @@ func ghostMode(s *discordgo.Session, m *discordgo.MessageCreate, msg []string) {
 		deletemsg = append(deletemsg, msgId.ID)
 
 		// iterate over the deletemsg and delete the messeges.
-		for _, mid := range deletemsg {
+		for ind, mid := range deletemsg {
 			if err := s.ChannelMessageDelete(m.ChannelID, mid); err != nil {
 				log.Fatalf("❌ Failed in delete msg %+#v", err.Error())
+			}
+
+			// For avoding multiple delete request [BANNED DISCORD BOT]
+			if ind%5 == 0 {
+				time.Sleep(time.Second * 2)
 			}
 		}
 		// stop the ghost-mode
