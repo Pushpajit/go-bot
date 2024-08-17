@@ -56,9 +56,14 @@ func CreateMovieEmbed(movie models.Movie) *discordgo.MessageEmbed {
 				Value:  fmt.Sprintf("[TMDb Link](https://www.themoviedb.org/movie/%d)", movie.Id),
 				Inline: false,
 			},
+			{
+				Name:   "🎥 Watch Trailer",
+				Value:  fmt.Sprintf("[YouTube Link](%v)", youtubeURL),
+				Inline: false,
+			},
 		},
 		Image: &discordgo.MessageEmbedImage{
-			URL: youtubeURL,
+			URL: baseImageURL + movie.Backdrop,
 		},
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
 			URL: baseImageURL + movie.Poster,
