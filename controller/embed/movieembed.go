@@ -103,7 +103,7 @@ func getyoutubeURL(movieID int) string {
 		fmt.Println("Error:", err)
 	}
 
-	var watchURL string
+	var watchURL = "https://www.youtube.com/watch?v"
 
 	for _, item := range response.Results {
 		if item.Type == "Trailer" {
