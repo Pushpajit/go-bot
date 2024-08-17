@@ -26,8 +26,10 @@ func CreateMovieEmbed(movie models.Movie) *discordgo.MessageEmbed {
 	}
 
 	generateGenres := strings.Join(formattedGenres, ", ")
+	youtubeURL := getyoutubeURL(movie.Id)
 
 	fmt.Println("generateGenres: ", generateGenres)
+	fmt.Println("watchURL: ", youtubeURL)
 
 	return &discordgo.MessageEmbed{
 		Title:       fmt.Sprintf("🎬 **%s** `(ID: %d)`", movie.Title, movie.Id),
@@ -56,7 +58,7 @@ func CreateMovieEmbed(movie models.Movie) *discordgo.MessageEmbed {
 			},
 		},
 		Image: &discordgo.MessageEmbedImage{
-			URL: getyoutubeURL(movie.Id),
+			URL: youtubeURL,
 		},
 		Thumbnail: &discordgo.MessageEmbedThumbnail{
 			URL: baseImageURL + movie.Poster,
