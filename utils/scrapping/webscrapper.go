@@ -17,6 +17,15 @@ type Image struct {
 func GetImage(msg []string) []Image {
 	var images []Image
 
+	images = append(images, getImageDesktopHut(msg)...)
+	images = append(images, getImageUnsplash(msg)...)
+
+	return images
+}
+
+func getImageUnsplash(msg []string) []Image {
+	var images []Image
+
 	// Start the performance timer
 	startTime := time.Now()
 
@@ -53,4 +62,39 @@ func GetImage(msg []string) []Image {
 	fmt.Printf("💿 All Download Completed ✅\n⏳ Time Taken %vs \n", elapsed.Seconds())
 
 	return images
+}
+
+func getImageDesktopHut(msg []string) []Image {
+	var images []Image
+
+	c := colly.NewCollector(
+		colly.AllowedDomains("www.desktophut.com"),
+	)
+
+	// It will trigger when it first hit the URL.
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Printf("Scrapping the URL: %v\n", r.URL)
+	})
+
+	// To handle the errors during scrapping.
+	c.OnError(func(r *colly.Response, err error) {
+		log.Fatal(err.Error())
+	})
+
+	// Start sending the scrapped URL into the channel, then it will also start downloading.
+	c.OnHTML("img[class='customimg img-fluid rounded  ']", func(h *colly.HTMLElement) {
+		images = append(images, Image{
+			Title: h.Attr("alt"),
+			URL:   h.Attr("src"),
+		})
+	})
+
+	// Format the URL
+	URL := fmt.Sprintf("https://www.desktophut.com/search/%v", strings.Join(strings.Split(msg[1], "-"), " "))
+
+	// Start visiting the URL
+	c.Visit(URL)
+
+	return images
+
 }
