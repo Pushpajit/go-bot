@@ -18,7 +18,7 @@ func GetImage(msg []string) []Image {
 	var images []Image
 
 	images = append(images, getImageDesktopHut(msg)...)
-	images = append(images, getImageUnsplash(msg)...)
+	// images = append(images, getImageUnsplash(msg)...)
 
 	return images
 }
